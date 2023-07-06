@@ -10,8 +10,8 @@ const dbKnex = require("../data/db_config");
 router.get("/",async(req,res) => {
     try{
         //para obter os livros pode-se utilizar .select().orderBy() ou apenas .orderBy()
-        const autores = await dbKnex("autores").orderBy("id","desc");
-        res.status(200).json(autores); //retorna statusCode ok e os dados
+        const editora = await dbKnex("editora").orderBy("id","desc");
+        res.status(200).json(editora); //retorna statusCode ok e os dados
     }catch(error){
         res.status(400).json({msg:error.message}); //retorna status de erro e msg
     }
@@ -27,18 +27,18 @@ router.post("/",async (req,res)=>{
     //const preco = req.params.preco;
     //const foto = req.params.foto;
    
-    const {nome, sobrenome, idade, data_nascimento, sexo, telefone} = req.body;
+    const {nome, cidade, estado, telefone, rua, cep} = req.body;
     
     //se algum dos campos não foi passado, irá enviar uma mensagem de erro ao retornar
-    if(!nome || !sobrenome || !idade || !data_nascimento || !sexo || !telefone){
-        res.status(400).json({msg:"Enviar nome, sobrenome, idade, data_nascimento, sexo e telefone do autor."});
+    if(!nome || !cidade || !estado || !telefone || !rua || !cep){
+        res.status(400).json({msg:"Enviar nome, cidade, estado, telefone, rua e cep da editora."});
         return;
     }
 
     //caso ocorra algum erro na inclusão, o programa irá capturar(catch) o erro
     try{
         //insert, faz a inserção na tabela livros(e retorna o id do registro inserido)
-        const novo = await dbKnex("autores").insert({nome, sobrenome, idade, data_nascimento, sexo, telefone});
+        const novo = await dbKnex("editora").insert({nome, cidade, estado, telefone, rua, cep});
         res.status(201).json({id:novo[0]}); //statuscode indica Create
     }catch(error){
         res.status(400).json({msg:error.message}); //retorna status de erro e msg
@@ -49,10 +49,10 @@ router.post("/",async (req,res)=>{
 //método put é usado para alteração. id indica o registro a ser alterado
 router.put("/:id",async(req,res) => {
     const id = req.params.id; //
-    const {telefone} = req.body; //campo a ser alterado
+    const {nome} = req.body; //campo a ser alterado
     try{
         //altera o campo preco, no registro cujo id coincidir com o parametro passado
-        await dbKnex("autores").update({telefone}).where({id});
+        await dbKnex("editora").update({nome}).where({id});
         res.status(200).json(); //statusCode indica ok
     }catch(error){
         res.status(400).json({msg:error.message}); //retorna status de erro e msg
@@ -64,7 +64,7 @@ router.put("/:id",async(req,res) => {
 router.delete("/:id",async(req,res) => {
     const {id} = req.params; //id do registro a ser excluído
     try{
-        await dbKnex("autores").del().where({id});
+        await dbKnex("editora").del().where({id});
         res.status(200).json(); //statusCode indica Ok
     }catch(error){
         res.status(400).json({msg:error.message}); //retorna status de erro e msg
@@ -75,10 +75,10 @@ router.delete("/:id",async(req,res) => {
 router.get("/filtro/:palavra", async(req,res)=> {
     const palavra = req.params.palavra; // palavra ou titulo a pesquisar
     try{
-            const autores = await dbKnex("autores")
-            .where("titulo","like", `%${palavra}%`)
-            .orWhere("autor","like",`%${palavra}%`);
-            res.status(200).json(autores); //retorna statusCode ok e os dados
+            const editora = await dbKnex("editora")
+            .where("nome","like", `%${palavra}%`)
+            .orWhere("editora","like",`%${palavra}%`);
+            res.status(200).json(editora); //retorna statusCode ok e os dados
         }catch(error){
             res.status(400).json({msg:error.message}); //retorna status de erro e msg
         }
@@ -87,12 +87,12 @@ router.get("/filtro/:palavra", async(req,res)=> {
 //Resumo do cadastro de livros
 router.get("/dados/resumo",async (req,res) =>{
     try{
-        const autores = await dbKnex("autores")
+        const editora = await dbKnex("editora")
         .count({num: "*"})
         .sum({soma: "preco"})
         .max({maior: "preco"})
         .avg({media: "preco"});
-        const {num,soma,maior,media} = autores[0];
+        const {num,soma,maior,media} = editora[0];
         res.status(200).json({num,soma,maior,media:Number(media.toFixed(2))});
     }catch(error){
         res.status(400).json({msg:error.message}); //retorna status de erro e msg
@@ -103,7 +103,7 @@ router.get("/dados/resumo",async (req,res) =>{
 router.get("/dados/grafico",async (req,res) =>{
     try{
         //obtém ano e soma do preço dos livros, Agrupados por ano
-        const totalPorAno = await dbKnex("autores").select("ano")
+        const totalPorAno = await dbKnex("editora").select("ano")
         .sum({total:"preco"}).groupBy("ano");
         res.status(200).json(totalPorAno);
     }catch(error){
