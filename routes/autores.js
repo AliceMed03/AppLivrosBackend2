@@ -76,8 +76,7 @@ router.get("/filtro/:palavra", async(req,res)=> {
     const palavra = req.params.palavra; // palavra ou titulo a pesquisar
     try{
             const autores = await dbKnex("autores")
-            .where("titulo","like", `%${palavra}%`)
-            .orWhere("autor","like",`%${palavra}%`);
+            .where("nome","like", `%${palavra}%`);
             res.status(200).json(autores); //retorna statusCode ok e os dados
         }catch(error){
             res.status(400).json({msg:error.message}); //retorna status de erro e msg

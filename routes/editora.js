@@ -77,7 +77,6 @@ router.get("/filtro/:palavra", async(req,res)=> {
     try{
             const editora = await dbKnex("editora")
             .where("nome","like", `%${palavra}%`)
-            .orWhere("editora","like",`%${palavra}%`);
             res.status(200).json(editora); //retorna statusCode ok e os dados
         }catch(error){
             res.status(400).json({msg:error.message}); //retorna status de erro e msg
